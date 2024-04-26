@@ -148,6 +148,9 @@ class Application(QWidget):
 			payload_used = re.search(r"Payload sent: (.*)", vulnerability[1])
 			payload_used = payload_used.group(1) if payload_used else "Unknown"
 
+			if method == "POST":
+				payload_used = "\">" + payload_used
+
 			data.append([type_of_vulnerability, method, url, payload_used])
 
 		status_text_label = QLabel("Website XSS Vulnerability Status: ")
@@ -171,6 +174,8 @@ class Application(QWidget):
 		for record in data:
 			vulnerability_type = record[0]
 			payload_used = record[3]
+			if payload_used.startswith('">'):
+				payload_used = payload_used[2:]
 			payload_file = payloads_dict[vulnerability_type]
 
 			if payload_file is None:
@@ -235,7 +240,6 @@ class Application(QWidget):
 		button_layout.setAlignment(Qt.AlignCenter)
 
 		layout.addLayout(button_layout)
-
 
 
 		self.setLayout(layout)

