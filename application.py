@@ -60,6 +60,9 @@ class Application(QWidget):
 		layout.addWidget(image_label)
 
 		self.url_label = QLabel("URL:")
+		font = self.url_label.font()
+		font.setPointSize(14)
+		self.url_label.setFont(font)
 		layout.addWidget(self.url_label)
 
 		self.url_entry = QLineEdit()	
@@ -70,12 +73,20 @@ class Application(QWidget):
 		self.fast_scan_button = QPushButton("Fast Scan")
 		self.fast_scan_button.setStyleSheet("background-color: #e3f5ff; padding: 10px; border-radius: 10px; border: 2px solid #d3d3d3;")
 		self.fast_scan_button.setFixedHeight(50)
+		font = self.fast_scan_button.font()
+		font.setPointSize(14)
+		font.setFamily("Roboto")
+		self.fast_scan_button.setFont(font)
 		self.fast_scan_button.clicked.connect(self.fast_scan)
 		layout.addWidget(self.fast_scan_button)
 
 		self.normal_scan_button = QPushButton("Normal Scan")
 		self.normal_scan_button.setStyleSheet("background-color: #baddff; padding: 10px; border-radius: 10px; border: 2px solid #d3d3d3;")
 		self.normal_scan_button.setFixedHeight(50)
+		font = self.normal_scan_button.font()
+		font.setPointSize(14)
+		font.setFamily("Roboto")
+		self.normal_scan_button.setFont(font)
 		self.normal_scan_button.clicked.connect(self.normal_scan)
 		layout.addWidget(self.normal_scan_button)
 
