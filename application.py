@@ -118,7 +118,7 @@ class Application(QWidget):
 			scanner.main(url, payloads_files, callback=self.on_crawl_finished)
 		else:
 			scanner.main(url, payloads_files)
-			crawler.crawl(url, payloads_files, 2, callback=self.on_crawl_finished)
+			crawler.crawl(url, payloads_files, callback=self.on_crawl_finished)
 		
 
 
