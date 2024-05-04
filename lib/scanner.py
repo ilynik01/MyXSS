@@ -7,6 +7,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 from lib.log import *
 from lib.mysession import MySession
+from threading import Thread
 
 
 
@@ -134,6 +135,8 @@ class scanner:
 						Log.info("GET Link with query. URL ignored. Reason: not HTTP")
 		return False
 
+
+
 	@classmethod
 	def main(self, url, files, callback=None):
 		
@@ -157,21 +160,31 @@ class scanner:
 
 		payloads = self.get_payloads_from_files(files)
 		vulnerabilities_found = {file: False for file in files}
-		for i, payload_list in enumerate(payloads):
+
+		def scan_payloads(payload_list, file):
 			for payload in payload_list:
 				self.payload = payload
 				if self.post_method():
-					Log.alert("Vulnerability. POST form. Payload file: " + files[i])
-					vulnerabilities_found[files[i]] = True
+					Log.alert("Vulnerability. POST form. Payload file: " + file)
+					vulnerabilities_found[file] = True
 					break
 				elif self.get_method():
-					Log.alert("Vulnerability. GET query. Payload file: " + files[i])
-					vulnerabilities_found[files[i]] = True
+					Log.alert("Vulnerability. GET query. Payload file: " + file)
+					vulnerabilities_found[file] = True
 					break
 				elif self.get_method_form():
-					Log.alert("Vulnerability. GET form. Payload file: " + files[i])
-					vulnerabilities_found[files[i]] = True
+					Log.alert("Vulnerability. GET form. Payload file: " + file)
+					vulnerabilities_found[file] = True
 					break
+
+		threads = []
+		for i, payload_list in enumerate(payloads):
+			t = Thread(target=scan_payloads, args=(payload_list, files[i]))
+			t.start()
+			threads.append(t)
+
+		for t in threads:
+			t.join()
 
 		if all(vulnerabilities_found.values()):
 			Log.alert("____Scanning thread conclusion: Vulnerabilities found with payloads from all files____")
