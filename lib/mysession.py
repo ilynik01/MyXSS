@@ -4,7 +4,7 @@ from requests.exceptions import TooManyRedirects
 
 
 class MySession(Session):
-    def __init__(self, max_redirects=3, *args, **kwargs):
+    def __init__(self, max_redirects=5, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.max_redirects = max_redirects
 
