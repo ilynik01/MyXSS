@@ -1,5 +1,6 @@
 from urllib.parse import parse_qs, urlencode, urljoin, urlparse
 
+import os
 import requests
 from bs4 import BeautifulSoup
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -8,190 +9,244 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 from lib.log import *
 from lib.mysession import MySession
 from threading import Thread
+from queue import Queue
 
 
 
 class scanner:
-	@classmethod
-	def get_payloads_from_files(self, files):
-
-		payloads = []
-		for file in files:
-			with open(file, 'r') as f:
-				payloads.append([line.strip() for line in f])
-		return payloads
-
-
 
 	@classmethod
-	def post_method(self):
-		bsObj = BeautifulSoup(self.body, "html.parser")
-		forms = bsObj.find_all("form", method=True)
+	def scan_get(self, payloads):
+		source_code = BeautifulSoup(self.body, "html.parser")
+		links = source_code.find_all("a", href=True)
 
-		for form in forms:
-			action = form.get("action", self.url)
-
-			if form.get("method", "").lower().strip() == "post":
-				Log.warning(f"Found. POST method form: {urljoin(self.url, action)}")
-				Log.info("POST method form: Gathering input keys")
-
-				keys = {}
-				for key in form.find_all(["input", "textarea"]):
-					try:
-						if key.get("type") == "submit":
-							Log.info(f"POST form. Submit button key name: {key['name']} Assigned value: <Submit Confirm>")
-							keys[key["name"]] = key["name"]
-						else:
-							quote_type = "'" if "'" in str(key) else '"'
-							payload_with_quote = quote_type + ">" + self.payload
-							Log.info(f"POST form. Key name: {key['name']} Assigned payload: {payload_with_quote}")
-							keys[key["name"]] = payload_with_quote
-					except Exception as e:
-						Log.info(f"POST form. Error in key processing: {str(e)}")
-
-				Log.info("POST method form: Payload sending ")
-				req = self.session.post(urljoin(self.url, action), data=keys, allow_redirects=False)
-				if self.payload in req.text:
-					Log.alert(f"Vulnerability. POST form. At url {urljoin(self.url, req.url)}")
-					Log.alert(f"Vulnerability. POST form. Payload sent: {self.payload}")
-					return True
-				else:
-					Log.info("POST method form. No XSS detected")
-		return False
-
-
-
-	@classmethod
-	def get_method_form(self):
-		bsObj = BeautifulSoup(self.body, "html.parser")
-		forms = bsObj.find_all("form", method=True)
-
-		for form in forms:
-			action = form.get("action", self.url)
-
-			if form.get("method", "").lower().strip() == "get":
-				Log.warning(f"Found. GET method form: {urljoin(self.url, action)}")
-				Log.info("GET method form: Gathering input keys")
-
-				keys = {}
-				for key in form.find_all(["input", "textarea"]):
-					try:
-						if key.get("type") == "submit":
-							Log.info(f"GET form. Submit button key name: {key['name']} Assigned value: <Submit Confirm>")
-							keys[key["name"]] = key["name"]
-						else:
-							Log.info(f"GET form. Key name: {key['name']} Assigned payload: {self.payload}")
-							keys[key["name"]] = self.payload
-					except Exception as e:
-						Log.info(f"GET form. Error in key processing: {str(e)}")
-						try:
-							Log.info(f"GET form. Key name: {key['name']} Assigned payload: {self.payload}")
-							keys[key["name"]] = self.payload
-						except KeyError as e:
-							Log.info(f"GET form. Error in key processing: {str(e)}")
-
-				Log.info("GET method form: Payload sending ")
-				req = self.session.get(urljoin(self.url, action), params=keys, allow_redirects=False)
-
-				if self.payload in req.text:
-					Log.alert(f"Vulnerability. GET form. At url {urljoin(self.url, req.url)}")
-					Log.alert(f"Vulnerability. GET form. Payload sent: {self.payload}")
-					return True
-				else:
-					Log.info("GET method form. No XSS detected")
-		return False
-
-	@classmethod
-	def get_method(self):
-		bsObj = BeautifulSoup(self.body, "html.parser")
-		links = bsObj.find_all("a", href=True)
-
+		link_data = []
 		for a in links:
 			url = a["href"]
-			if not (url.startswith("http://") or url.startswith("https://") or url.startswith("mailto:")):
+			if not url.startswith("mailto:"):
 				base = urljoin(self.url, a["href"])
 				query = urlparse(base).query
 
 				if query:
-					Log.warning(f"Found. GET Link with query: {query}")
+					link_data.append((base, query))
 
-					query_payload = query.replace(query[query.find("=")+1:], self.payload, 1)
-					test = base.replace(query, query_payload, 1)
+		results = Queue()
 
-					query_all = base.replace(query, urlencode({x: self.payload for x in parse_qs(query)}))
+		def scan_payloads(payload_list, base, query):
+			payload_group_name = payload_list[0]
+			for payload in payload_list[1:]:
+				query_payload = query.replace(query[query.find("=")+1:], payload, 1)
+				test = base.replace(query, query_payload, 1)
+				query_all = base.replace(query, urlencode({x: payload for x in parse_qs(query)}))
 
-					Log.info(f"GET Link with query. Payload injected query: {test}")
-					Log.info(f"GET Link with query. Payload injected in all parameters: {query_all}")
+				_respon = self.session.get(test, verify=False)
+				if payload in _respon.text or payload in self.session.get(query_all).text:
+					Log.alert(f"Vulnerability. GET query. At url {_respon.url}")
+					Log.alert(f"Vulnerability. GET query. Payload sent: {payload}")
+					Log.alert(f"Vulnerability. GET query. Payload file: {payload_group_name}")
+					results.put(True)
+					return
+				else:
+					results.put(False)
 
-					if not (url.startswith("mailto:") or url.startswith("tel:")):
-						_respon = self.session.get(test, verify=False, allow_redirects=False)
-						if self.payload in _respon.text or self.payload in self.session.get(query_all, allow_redirects=False).text:
-							Log.alert(f"Vulnerability. GET query. At url {_respon.url}")
-							Log.alert(f"Vulnerability. GET query. Payload sent: {self.payload}")
-							return True
-						else:
-							Log.info("GET Link with query. No XSS detected")
-					else:
-						Log.info("GET Link with query. URL ignored. Reason: not HTTP")
+		threads = []
+		for payload_list in payloads:
+			for base, query in link_data:
+				t = Thread(target=scan_payloads, args=(payload_list, base, query))
+				t.start()
+				threads.append(t)
+
+		for t in threads:
+			t.join()
+
+		while not results.empty():
+			if results.get():
+				return True
+
 		return False
+
+
+
+
+
+	@classmethod
+	def scan_post(self, payloads):
+		source_code = BeautifulSoup(self.body, "html.parser")
+		forms = source_code.find_all("form")
+		method_forms = [form for form in forms if form.get('method')]
+		form_data = []
+		
+		for form in method_forms:
+			action = form.get("action", self.url)
+
+			if form.get("method", "").lower().strip() == "post":
+				keys = []
+				for key in form.find_all(["input", "textarea"]):
+					try:
+						if key.get("type") == "submit":
+							keys.append(key["name"])
+						else:
+							keys.append(key["name"])
+					except Exception as e:
+						Log.error(f"POST form. Error in key processing: {str(e)}")
+
+				form_data.append((action, keys))
+
+		results = Queue()
+
+		def scan_payloads(payload_list, action, keys):
+			payload_group_name = payload_list[0]
+			for payload in payload_list[1:]:
+				data = {}
+				for key in keys:
+					quote_type = "'" if "'" in str(key) else '"'
+					payload_quote = quote_type + ">" + payload
+					data[key] = payload_quote
+
+				request = self.session.post(urljoin(self.url, action), data=data)
+				if payload in request.text:
+					Log.alert(f"Vulnerability. POST form. At url {urljoin(self.url, request.url)}")
+					Log.alert(f"Vulnerability. POST form. Payload sent: {payload}")
+					Log.alert(f"Vulnerability. POST form. Payload file: {payload_group_name}")
+					results.put(True)
+					return
+				else:
+					results.put(False)
+
+		threads = []
+		for payload_list in payloads:
+			for action, keys in form_data:
+				t = Thread(target=scan_payloads, args=(payload_list, action, keys))
+				t.start()
+				threads.append(t)
+
+		for t in threads:
+			t.join()
+
+		while not results.empty():
+			if results.get():
+				return True
+
+		return False
+
+
+
+	@classmethod
+	def scan_get_form(self, payloads):
+		source_code = BeautifulSoup(self.body, "html.parser")
+		forms = source_code.find_all("form")
+		method_forms = [form for form in forms if form.get('method')]
+		form_data = []
+		
+		for form in method_forms:
+			action = form.get("action", self.url)
+
+			if form.get("method", "").lower().strip() == "get":
+				keys = []
+				for key in form.find_all(["input", "textarea"]):
+					if key.has_attr("name"):
+						try:
+							keys.append(key["name"])
+						except Exception as e:
+							Log.error(f"GET form. Error in key processing: {str(e)}")
+
+				form_data.append((action, keys))
+
+		results = Queue()
+
+		def scan_payloads(payload_list, action, keys):
+			payload_group_name = payload_list[0]
+			for payload in payload_list[1:]:
+				data = {}
+				for key in keys:
+					quote_type = "'" if "'" in str(key) else '"'
+					payload_quote = quote_type + ">" + payload
+					data[key] = payload_quote
+
+				request = self.session.get(urljoin(self.url, action), data=data)
+				if payload in request.text:
+					Log.alert(f"Vulnerability. GET form. At url {urljoin(self.url, request.url)}")
+					Log.alert(f"Vulnerability. GET form. Payload sent: {payload}")
+					Log.alert(f"Vulnerability. GET form. Payload file: {payload_group_name}")
+					results.put(True)
+					return
+				else:
+					results.put(False)
+
+		threads = []
+		for payload_list in payloads:
+			for action, keys in form_data:
+				t = Thread(target=scan_payloads, args=(payload_list, action, keys))
+				t.start()
+				threads.append(t)
+
+		for t in threads:
+			t.join()
+
+		while not results.empty():
+			if results.get():
+				return True
+
+		return False
+
+
+
+
+
+	@classmethod
+	def check_connection(self, url):
+		self.url = url
+		self.session = MySession()
+		Log.info("URL Connection. Connecting to " + url)
+		try:
+			response = self.session.request('GET', url)
+			self.body = response.content.decode('utf-8')
+		except Exception as e:
+			Log.error("URL Connection. Error: " + str(e))
+			return False
+
+		if not response.ok:
+			Log.error("URL Connection. Error: " + str(response.status_code))
+			return False
+
+		Log.info("URL Connection. Connection successful")
+		return True
+
 
 
 
 	@classmethod
 	def main(self, url, files, callback=None):
-		
-		print("____New scanning thread____")
-		self.url=url
-
-		self.session=MySession()
-		Log.info("URL Connection. Connecting to "+url)    
-		try:
-			ctr = self.session.get(url, allow_redirects=False)
-			self.body=ctr.text
-		except Exception as e:
-			Log.error("URL Connection. Internal error: "+str(e))
+		if not self.check_connection(url):
 			return
 
-		if ctr.status_code > 400:
-			Log.error("URL Connection. Connection failed: "+str(ctr.status_code))
-			return 
-		else:
-			Log.info("URL Connection. Connection estabilished: "+str(ctr.status_code))
-
-		payloads = self.get_payloads_from_files(files)
-		vulnerabilities_found = {file: False for file in files}
-
-		def scan_payloads(payload_list, file):
-			for payload in payload_list:
-				self.payload = payload
-				if self.post_method():
-					Log.alert("Vulnerability. POST form. Payload file: " + file)
-					vulnerabilities_found[file] = True
-					break
-				elif self.get_method():
-					Log.alert("Vulnerability. GET query. Payload file: " + file)
-					vulnerabilities_found[file] = True
-					break
-				elif self.get_method_form():
-					Log.alert("Vulnerability. GET form. Payload file: " + file)
-					vulnerabilities_found[file] = True
-					break
+		payloads = []
+		for file in files:
+			with open(file, 'r') as f:
+				file_name = os.path.splitext(os.path.basename(file))[0]
+				payload_list = [line.strip() for line in f]
+				payload_list.insert(0, file_name)
+				payloads.append(payload_list)
 
 		threads = []
-		for i, payload_list in enumerate(payloads):
-			t = Thread(target=scan_payloads, args=(payload_list, files[i]))
+		methods = [self.scan_post, self.scan_get, self.scan_get_form]
+		results = {method.__name__: None for method in methods}
+
+		for method in methods:
+			def target_method(payloads):
+				result = method(payloads)
+				results[method.__name__] = result
+				if result:
+					Log.alert(f"___URL {url} scanning conclusion: Found XSS with {method.__name__} ___")
+				else:
+					Log.info(f"___URL {url} scanning conclusion: No XSS found with {method.__name__} ___")
+
+			t = Thread(target=target_method, args=(payloads,))
 			t.start()
 			threads.append(t)
 
 		for t in threads:
 			t.join()
-
-		if all(vulnerabilities_found.values()):
-			Log.alert("____Scanning thread conclusion: Vulnerabilities found with payloads from all files____")
-		elif any(vulnerabilities_found.values()):
-			Log.alert("____Scanning thread conclusion: Vulnerabilities found with payloads from some files____")
-		else:
-			Log.info("____Scanning thread conclusion: No vulnerabilities found with payloads from any files____")
 
 		if callback is not None:
 			callback()

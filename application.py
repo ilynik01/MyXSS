@@ -18,6 +18,16 @@ from lib.scanner import *
 
 
 
+def resource_path(relative_path):
+	""" Get absolute path to resource, works for dev and for PyInstaller """
+	try:
+		base_path = sys._MEIPASS
+	except Exception:
+		base_path = os.path.abspath(".")
+
+	return os.path.join(base_path, relative_path)
+
+
 payloads_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'payloads')
 payloads_files = glob.glob(os.path.join(payloads_dir, '*'))
 
@@ -61,7 +71,7 @@ class Application(QWidget):
 
 		self.url_label = QLabel("URL:")
 		font = self.url_label.font()
-		font.setPointSize(14)
+		font.setPointSize(20)
 		self.url_label.setFont(font)
 		layout.addWidget(self.url_label)
 
@@ -74,7 +84,7 @@ class Application(QWidget):
 		self.fast_scan_button.setStyleSheet("background-color: #e3f5ff; padding: 10px; border-radius: 10px; border: 2px solid #d3d3d3;")
 		self.fast_scan_button.setFixedHeight(50)
 		font = self.fast_scan_button.font()
-		font.setPointSize(14)
+		font.setPointSize(20)
 		font.setFamily("Roboto")
 		self.fast_scan_button.setFont(font)
 		self.fast_scan_button.clicked.connect(self.fast_scan)
@@ -84,7 +94,7 @@ class Application(QWidget):
 		self.normal_scan_button.setStyleSheet("background-color: #baddff; padding: 10px; border-radius: 10px; border: 2px solid #d3d3d3;")
 		self.normal_scan_button.setFixedHeight(50)
 		font = self.normal_scan_button.font()
-		font.setPointSize(14)
+		font.setPointSize(20)
 		font.setFamily("Roboto")
 		self.normal_scan_button.setFont(font)
 		self.normal_scan_button.clicked.connect(self.normal_scan)
@@ -147,7 +157,7 @@ class Application(QWidget):
 
 		data = []
 		for vulnerability in vulnerabilities:
-			type_of_vulnerability = re.search(r"file: .*\\(.*)\.txt", vulnerability[2])
+			type_of_vulnerability = re.search(r"Payload file: (.*)", vulnerability[2])
 			type_of_vulnerability = type_of_vulnerability.group(1) if type_of_vulnerability else "Unknown"
 
 			method = re.search(r"Vulnerability\. (\w+)", vulnerability[0])
