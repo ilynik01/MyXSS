@@ -31,9 +31,7 @@ def resource_path(relative_path):
 
 
 
-
-
-payloads_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'payloads')
+payloads_dir = resource_path('payloads')
 payloads_files = glob.glob(os.path.join(payloads_dir, '*'))
 
 
@@ -68,7 +66,7 @@ class Application(QWidget):
 			layout = QVBoxLayout()
 
 		image_label = QLabel()
-		image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'images/MyXSS.png')
+		image_path = resource_path('images\\MyXSS.png')
 		pixmap = QPixmap(image_path)
 		pixmap = pixmap.scaled(800, 800, Qt.KeepAspectRatio)
 

