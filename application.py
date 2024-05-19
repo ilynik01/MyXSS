@@ -28,6 +28,11 @@ def resource_path(relative_path):
 	return os.path.join(base_path, relative_path)
 
 
+
+
+
+
+
 payloads_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'payloads')
 payloads_files = glob.glob(os.path.join(payloads_dir, '*'))
 
@@ -54,6 +59,7 @@ class Application(QWidget):
 
 	def create_initial_widgets(self):
 		Log.clear_log()
+		scanner.detected_vulnerabilities.clear()
 
 		layout = self.layout()
 		if layout is not None:
@@ -138,6 +144,11 @@ class Application(QWidget):
 
 
 	def generate_report(self):
+		if scanner.detected_vulnerabilities:
+			print(scanner.detected_vulnerabilities)
+		else:
+			print("[] - scanner.detected_vulnerabilities is empty")
+
 		layout = self.layout()
 		self.clear_layout(layout)
 
@@ -145,34 +156,15 @@ class Application(QWidget):
 		title_label.setFont(QFont('Arial', 30))
 		layout.addWidget(title_label)
 
-		log_dict = Log.log_dict
-		vulnerability_logs = log_dict["VULNERABILITY"]
-
-		vulnerabilities = []
-
-		for i in range(0, len(vulnerability_logs), 3):
-			if i + 2 >= len(vulnerability_logs):
-				break
-			vulnerabilities.append((vulnerability_logs[i], vulnerability_logs[i+1], vulnerability_logs[i+2]))
-
 		data = []
-		for vulnerability in vulnerabilities:
-			type_of_vulnerability = re.search(r"Payload file: (.*)", vulnerability[2])
-			type_of_vulnerability = type_of_vulnerability.group(1) if type_of_vulnerability else "Unknown"
-
-			method = re.search(r"Vulnerability\. (\w+)", vulnerability[0])
-			method = method.group(1) if method else "Unknown"
-
-			url = re.search(r"At url (http[s]?://.*)", vulnerability[0])
-			url = url.group(1) if url else "Unknown"
-
-			payload_used = re.search(r"Payload sent: (.*)", vulnerability[1])
-			payload_used = payload_used.group(1) if payload_used else "Unknown"
-
-			if method == "POST":
-				payload_used = "\">" + payload_used
+		for vulnerability in scanner.detected_vulnerabilities:
+			type_of_vulnerability = vulnerability['Payload file']
+			method = vulnerability['HTTP Method']
+			url = vulnerability['URL']
+			payload_used = vulnerability['Payload']
 
 			data.append([type_of_vulnerability, method, url, payload_used])
+
 
 		status_text_label = QLabel("Website XSS Vulnerability Status: ")
 		status_text_label.setFont(QFont('Arial', 14))
@@ -195,8 +187,6 @@ class Application(QWidget):
 		for record in data:
 			vulnerability_type = record[0]
 			payload_used = record[3]
-			if payload_used.startswith('">'):
-				payload_used = payload_used[2:]
 			payload_file = payloads_dict[vulnerability_type]
 
 			if payload_file is None:
@@ -241,7 +231,6 @@ class Application(QWidget):
 
 		self.table = QTableWidget()
 		layout.addWidget(self.table)
-
 
 		button_width = int(self.width() * 0.4)
 
