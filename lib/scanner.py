@@ -18,6 +18,8 @@ from queue import Queue
 class scanner:
 	detected_vulnerabilities = []
 
+
+
 	@classmethod
 	def scan_get(cls, payloads):
 		source_code = BeautifulSoup(cls.body, "html.parser")
@@ -44,10 +46,10 @@ class scanner:
 
 				request = cls.session.get(test, verify=False)
 				if payload in request.text or payload in cls.session.get(query_all).text:
-					Log.alert(f"Vulnerability. GET query. At url {_respon.url}")
+					Log.alert(f"Vulnerability. GET query. At url {request.url}")
 					Log.alert(f"Vulnerability. GET query. Payload sent: {payload}")
 					Log.alert(f"Vulnerability. GET query. Payload file: {payload_group_name}")
-					
+
 					vulnerability_info = {
 						"HTTP Method": "GET",
 						"URL": request.url,
@@ -81,14 +83,14 @@ class scanner:
 
 
 	@classmethod
-	def scan_post(self, payloads):
-		source_code = BeautifulSoup(self.body, "html.parser")
+	def scan_post(cls, payloads):
+		source_code = BeautifulSoup(cls.body, "html.parser")
 		forms = source_code.find_all("form")
 		method_forms = [form for form in forms if form.get('method')]
 		form_data = []
-		
+
 		for form in method_forms:
-			action = form.get("action", self.url)
+			action = form.get("action", cls.url)
 
 			if form.get("method", "").lower().strip() == "post":
 				keys = []
@@ -114,11 +116,19 @@ class scanner:
 					payload_quote = quote_type + ">" + payload
 					data[key] = payload_quote
 
-				request = self.session.post(urljoin(self.url, action), data=data)
+				request = cls.session.post(urljoin(cls.url, action), data=data)
 				if payload in request.text:
-					Log.alert(f"Vulnerability. POST form. At url {urljoin(self.url, request.url)}")
+					Log.alert(f"Vulnerability. POST form. At url {urljoin(cls.url, request.url)}")
 					Log.alert(f"Vulnerability. POST form. Payload sent: {payload}")
 					Log.alert(f"Vulnerability. POST form. Payload file: {payload_group_name}")
+
+					vulnerability_info = {
+						"HTTP Method": "POST",
+						"URL": urljoin(cls.url, request.url),
+						"Payload": payload,
+						"Payload file": payload_group_name
+					}
+					cls.detected_vulnerabilities.append(vulnerability_info)
 					results.put(True)
 					return
 				else:
@@ -144,14 +154,14 @@ class scanner:
 
 
 	@classmethod
-	def scan_get_form(self, payloads):
-		source_code = BeautifulSoup(self.body, "html.parser")
+	def scan_get_form(cls, payloads):
+		source_code = BeautifulSoup(cls.body, "html.parser")
 		forms = source_code.find_all("form")
 		method_forms = [form for form in forms if form.get('method')]
 		form_data = []
-		
+
 		for form in method_forms:
-			action = form.get("action", self.url)
+			action = form.get("action", cls.url)
 
 			if form.get("method", "").lower().strip() == "get":
 				keys = []
@@ -175,11 +185,19 @@ class scanner:
 					payload_quote = quote_type + ">" + payload
 					data[key] = payload_quote
 
-				request = self.session.get(urljoin(self.url, action), data=data)
+				request = cls.session.get(urljoin(cls.url, action), data=data)
 				if payload in request.text:
-					Log.alert(f"Vulnerability. GET form. At url {urljoin(self.url, request.url)}")
+					Log.alert(f"Vulnerability. GET form. At url {urljoin(cls.url, request.url)}")
 					Log.alert(f"Vulnerability. GET form. Payload sent: {payload}")
 					Log.alert(f"Vulnerability. GET form. Payload file: {payload_group_name}")
+					
+					vulnerability_info = {
+						"HTTP Method": "GET",
+						"URL": urljoin(cls.url, request.url),
+						"Payload": payload,
+						"Payload file": payload_group_name
+					}
+					cls.detected_vulnerabilities.append(vulnerability_info)
 					results.put(True)
 					return
 				else:
