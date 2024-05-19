@@ -18,8 +18,6 @@ from queue import Queue
 class scanner:
 	detected_vulnerabilities = []
 
-
-
 	@classmethod
 	def scan_get(cls, payloads):
 		source_code = BeautifulSoup(cls.body, "html.parser")
@@ -77,9 +75,6 @@ class scanner:
 				return True
 
 		return False
-
-
-
 
 
 	@classmethod
@@ -152,7 +147,6 @@ class scanner:
 
 
 
-
 	@classmethod
 	def scan_get_form(cls, payloads):
 		source_code = BeautifulSoup(cls.body, "html.parser")
@@ -220,9 +214,6 @@ class scanner:
 		return False
 
 
-
-
-
 	@classmethod
 	def check_connection(self, url):
 		self.url = url
@@ -241,8 +232,6 @@ class scanner:
 
 		Log.info("URL Connection. Connection successful")
 		return True
-
-
 
 
 	@classmethod

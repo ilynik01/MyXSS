@@ -3,22 +3,16 @@ from datetime import datetime
 
 
 class Log:
-    log_dict = {"INFO": [], "WARNING": [], "ERROR": [], "VULNERABILITY": []}
+    log_dict = {"INFO": [], "ERROR": [], "VULNERABILITY": []}
 
     @classmethod
     def clear_log(cls):
-        cls.log_dict = {"INFO": [], "WARNING": [], "ERROR": [], "VULNERABILITY": []}
+        cls.log_dict = {"INFO": [], "ERROR": [], "VULNERABILITY": []}
 
     @classmethod
     def info(cls, text):
         log_text = "[" + datetime.now().strftime("%H:%M:%S") + "] [INFO] " + text
         cls.log_dict["INFO"].append(log_text)
-        print(log_text)
-
-    @classmethod
-    def warning(cls, text):
-        log_text = "[" + datetime.now().strftime("%H:%M:%S") + "] [WARNING] " + text
-        cls.log_dict["WARNING"].append(log_text)
         print(log_text)
 
     @classmethod
