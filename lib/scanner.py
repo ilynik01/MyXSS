@@ -13,18 +13,21 @@ from queue import Queue
 
 
 
+
+
 class scanner:
+	detected_vulnerabilities = []
 
 	@classmethod
-	def scan_get(self, payloads):
-		source_code = BeautifulSoup(self.body, "html.parser")
+	def scan_get(cls, payloads):
+		source_code = BeautifulSoup(cls.body, "html.parser")
 		links = source_code.find_all("a", href=True)
 
 		link_data = []
 		for a in links:
 			url = a["href"]
 			if not url.startswith("mailto:"):
-				base = urljoin(self.url, a["href"])
+				base = urljoin(cls.url, a["href"])
 				query = urlparse(base).query
 
 				if query:
@@ -39,11 +42,19 @@ class scanner:
 				test = base.replace(query, query_payload, 1)
 				query_all = base.replace(query, urlencode({x: payload for x in parse_qs(query)}))
 
-				_respon = self.session.get(test, verify=False)
-				if payload in _respon.text or payload in self.session.get(query_all).text:
+				request = cls.session.get(test, verify=False)
+				if payload in request.text or payload in cls.session.get(query_all).text:
 					Log.alert(f"Vulnerability. GET query. At url {_respon.url}")
 					Log.alert(f"Vulnerability. GET query. Payload sent: {payload}")
 					Log.alert(f"Vulnerability. GET query. Payload file: {payload_group_name}")
+					
+					vulnerability_info = {
+						"HTTP Method": "GET",
+						"URL": request.url,
+						"Payload": payload,
+						"Payload file": payload_group_name
+					}
+					cls.detected_vulnerabilities.append(vulnerability_info)
 					results.put(True)
 					return
 				else:
@@ -128,6 +139,7 @@ class scanner:
 				return True
 
 		return False
+
 
 
 
